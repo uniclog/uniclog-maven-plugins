@@ -34,6 +34,17 @@ class InsertJsonMojoTest implements TestUtils {
         doReturn(inputPath).when(service).getJsonInputPath();
     }
 
+/*
+    /// @todo вставка если json такой [ "" ]
+    @Test
+    void test() throws Exception {
+        doReturn("src/test/resources/testInsert_in_2.json").when(service).getJsonInputPath();
+        ExecutionMojo execution = getSpyExecutionMojo("$", null, "value1",
+                STRING, null, false, null);
+        doReturn(List.of(execution)).when(service).getExecutions();
+        assertDoesNotThrow(() -> service.execute());
+    }*/
+
     @MethodSource({
             "insertValueKeyField", "insertNewArrayItem",
             "insertNewArrayItemToIndex", "notInsertNewArrayItem_notValid_or_skipIfNotFound"})
