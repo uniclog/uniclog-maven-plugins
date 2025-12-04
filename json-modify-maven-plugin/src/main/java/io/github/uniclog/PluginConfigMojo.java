@@ -55,6 +55,7 @@ public class PluginConfigMojo extends JmAbstractMojo {
             if (mojo == null) {
                 throw new MojoExecutionException("Unexpected value: " + action.getGoal());
             }
+            mojo.setLog(this.getLogger());
             mojo.execute();
         }
     }
@@ -91,11 +92,11 @@ public class PluginConfigMojo extends JmAbstractMojo {
             }
         } catch (FileNotFoundException ex) {
             String err = format("FileNotFoundException : %s", ex.getMessage());
-            getLogger().error(err, ex);
+            error(err, ex);
             throw new MojoExecutionException(err, ex);
         } catch (ValidationException | IOException ex) {
             String err = format("ValidationException : %s", ex.getMessage());
-            getLogger().error(err, ex);
+            error(err, ex);
             throw new MojoExecutionException(err, ex);
         }
     }
