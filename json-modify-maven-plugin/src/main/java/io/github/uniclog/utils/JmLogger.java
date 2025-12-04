@@ -13,7 +13,7 @@ public interface JmLogger {
         getLogger().debug(log);
     }
 
-    default void error(String log) {
-        getLogger().error(log);
+    default void error(String log, Throwable ex) {
+        getLogger().error(log, ex);
     }
 }
