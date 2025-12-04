@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -45,11 +46,19 @@ public class FileUtils {
         if (isNull(inputPath)) {
             throw new MojoExecutionException("Parameter 'json.in' can't be null.");
         }
-
         try (InputStream in = Files.newInputStream(FileSystems.getDefault().getPath(inputPath))) {
             byte[] buffer = new byte[in.available()];
             int bytesRead = in.read(buffer);
             return new String(buffer, 0, bytesRead, UTF_8);
+        } catch (NoSuchFileException e) {
+            String baseDir = Paths.get("").toAbsolutePath().toString();
+            try (InputStream in = Files.newInputStream(FileSystems.getDefault().getPath(baseDir + inputPath))) {
+                byte[] buffer = new byte[in.available()];
+                int bytesRead = in.read(buffer);
+                return new String(buffer, 0, bytesRead, UTF_8);
+            } catch (IOException ex) {
+                throw new MojoExecutionException("Unable to read file " + inputPath, e);
+            }
         } catch (IOException e) {
             throw new MojoExecutionException("Unable to read file " + inputPath, e);
         }

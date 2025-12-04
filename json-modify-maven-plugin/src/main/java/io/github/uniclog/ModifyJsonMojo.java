@@ -3,10 +3,8 @@ package io.github.uniclog;
 import com.jayway.jsonpath.DocumentContext;
 import io.github.uniclog.execution.ExecutionMojo;
 import io.github.uniclog.utils.ExecuteConsumer;
-import io.github.uniclog.utils.UtilsInterface;
-import org.apache.maven.plugin.AbstractMojo;
+import io.github.uniclog.utils.JmAbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -18,7 +16,7 @@ import static io.github.uniclog.utils.DataUtils.getElement;
 import static java.lang.String.format;
 
 @Mojo(name = "modify", defaultPhase = LifecyclePhase.PREPARE_PACKAGE)
-public class ModifyJsonMojo extends AbstractMojo implements UtilsInterface {
+public class ModifyJsonMojo extends JmAbstractMojo {
     @Parameter(alias = "json.in")
     private String jsonInputPath;
     @Parameter(alias = "json.out")
@@ -26,17 +24,13 @@ public class ModifyJsonMojo extends AbstractMojo implements UtilsInterface {
     @Parameter(alias = "executions", required = true)
     private List<ExecutionMojo> executions;
 
-    @Override
-    public void execute() throws MojoExecutionException {
-        ExecuteConsumer<Object, ExecutionMojo, Integer> executeConsumer = (object, ex, exIndex) -> {
-            DocumentContext json = (DocumentContext) object;
-            Object value = getElement(ex.getType(), ex.getValue(), ex.getValueFile());
-            var old = json.read(ex.getToken());
-            json.set(ex.getToken(), value);
-            info(format("(%d) md: %s: %s -> %s", exIndex, ex.getToken(), old, value));
-        };
+    public ModifyJsonMojo() {
+    }
 
-        executeAction(executeConsumer, JSON);
+    public ModifyJsonMojo(String jsonInputPath, String jsonOutputPath, List<ExecutionMojo> executions) {
+        this.jsonInputPath = jsonInputPath;
+        this.jsonOutputPath = jsonOutputPath;
+        this.executions = executions;
     }
 
     @Override
@@ -55,7 +49,15 @@ public class ModifyJsonMojo extends AbstractMojo implements UtilsInterface {
     }
 
     @Override
-    public Log getLogger() {
-        return getLog();
+    public void execute() throws MojoExecutionException {
+        ExecuteConsumer<Object, ExecutionMojo, Integer> executeConsumer = (object, ex, exIndex) -> {
+            DocumentContext json = (DocumentContext) object;
+            Object value = getElement(ex.getType(), ex.getValue(), ex.getValueFile());
+            var old = json.read(ex.getToken());
+            json.set(ex.getToken(), value);
+            info(format("(%d) md: %s: %s -> %s", exIndex, ex.getToken(), old, value));
+        };
+
+        executeAction(executeConsumer, JSON);
     }
 }

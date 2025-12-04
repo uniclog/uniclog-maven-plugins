@@ -310,7 +310,8 @@
                                     </executions>
                                 </configuration>
                             </execution>
-                            <!--<execution>
+<!-- NOT WORK^ @todo
+                            <execution>
                                 <id>modify-json-from-file-insert-2</id>
                                 <phase>prepare-package</phase>
                                 <goals>
@@ -326,7 +327,18 @@
                                         </execution>
                                     </executions>
                                 </configuration>
-                            </execution>-->
+                            </execution>
+ -->
+                            <execution>
+                                <id>yaml-config-1</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>configuration</goal>
+                                </goals>
+                                <configuration>
+                                    <config>${project.basedir}/src/main/resources/configuration.yaml</config>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                 </plugins>

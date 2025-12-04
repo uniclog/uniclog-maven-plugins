@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "plugin-config",
+  "type": "object",
+  "properties": {
+    "configuration": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "jsonIn": {
+            "type": "string"
+          },
+          "jsonOut": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "goal": {
+            "type": "string",
+            "enum": [
+              "regex",
+              "modify",
+              "insert",
+              "remove"
+            ]
+          },
+          "executions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "string",
+                    "integer",
+                    "double",
+                    "boolean",
+                    "json",
+                    "null"
+                  ]
+                },
+                "value": {},
+                "valueFile": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                },
+                "arrayIndex": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "validation": {},
+                "skipIfNotFoundElement": {
+                  "type": "boolean"
+                },
+                "skipOnExists": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "jsonIn",
+          "jsonOut",
+          "goal"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "configuration"
+  ],
+  "additionalProperties": false
+}
