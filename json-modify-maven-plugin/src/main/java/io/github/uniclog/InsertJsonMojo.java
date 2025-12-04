@@ -8,10 +8,8 @@ import com.jayway.jsonpath.JsonPath;
 import io.github.uniclog.execution.ExecutionMojo;
 import io.github.uniclog.execution.ExecutionType;
 import io.github.uniclog.utils.ExecuteConsumer;
-import io.github.uniclog.utils.UtilsInterface;
-import org.apache.maven.plugin.AbstractMojo;
+import io.github.uniclog.utils.JmAbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -24,7 +22,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Mojo(name = "insert", defaultPhase = LifecyclePhase.PREPARE_PACKAGE)
-public class InsertJsonMojo extends AbstractMojo implements UtilsInterface {
+public class InsertJsonMojo extends JmAbstractMojo {
     @Parameter(alias = "json.in")
     private String jsonInputPath;
     @Parameter(alias = "json.out")
@@ -39,6 +37,21 @@ public class InsertJsonMojo extends AbstractMojo implements UtilsInterface {
         this.jsonInputPath = jsonInputPath;
         this.jsonOutputPath = jsonOutputPath;
         this.executions = executions;
+    }
+
+    @Override
+    public String getJsonInputPath() {
+        return jsonInputPath;
+    }
+
+    @Override
+    public String getJsonOutputPath() {
+        return jsonOutputPath;
+    }
+
+    @Override
+    public List<ExecutionMojo> getExecutions() {
+        return executions;
     }
 
     @Override
@@ -88,25 +101,5 @@ public class InsertJsonMojo extends AbstractMojo implements UtilsInterface {
         } else if (ex.getType().equals(ExecutionType.NULL)) {
             outArrayNode.add((JsonNode) null);
         }
-    }
-
-    @Override
-    public String getJsonInputPath() {
-        return jsonInputPath;
-    }
-
-    @Override
-    public String getJsonOutputPath() {
-        return jsonOutputPath;
-    }
-
-    @Override
-    public List<ExecutionMojo> getExecutions() {
-        return executions;
-    }
-
-    @Override
-    public Log getLogger() {
-        return getLog();
     }
 }

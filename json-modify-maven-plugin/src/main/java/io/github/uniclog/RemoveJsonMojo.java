@@ -3,10 +3,8 @@ package io.github.uniclog;
 import com.jayway.jsonpath.DocumentContext;
 import io.github.uniclog.execution.ExecutionMojo;
 import io.github.uniclog.utils.ExecuteConsumer;
-import io.github.uniclog.utils.UtilsInterface;
-import org.apache.maven.plugin.AbstractMojo;
+import io.github.uniclog.utils.JmAbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -17,7 +15,7 @@ import static io.github.uniclog.execution.DocumentType.JSON;
 import static java.lang.String.format;
 
 @Mojo(name = "remove", defaultPhase = LifecyclePhase.PREPARE_PACKAGE)
-public class RemoveJsonMojo extends AbstractMojo implements UtilsInterface {
+public class RemoveJsonMojo extends JmAbstractMojo {
     @Parameter(alias = "json.in")
     private String jsonInputPath;
     @Parameter(alias = "json.out")
@@ -32,17 +30,6 @@ public class RemoveJsonMojo extends AbstractMojo implements UtilsInterface {
         this.jsonInputPath = jsonInputPath;
         this.jsonOutputPath = jsonOutputPath;
         this.executions = executions;
-    }
-
-    @Override
-    public void execute() throws MojoExecutionException {
-        ExecuteConsumer<Object, ExecutionMojo, Integer> executeConsumer = (object, ex, exIndex) -> {
-            DocumentContext json = (DocumentContext) object;
-            json.delete(ex.getToken());
-            info(format("(%d) rm: %s", exIndex, ex.getToken()));
-        };
-
-        executeAction(executeConsumer, JSON);
     }
 
     @Override
@@ -61,7 +48,13 @@ public class RemoveJsonMojo extends AbstractMojo implements UtilsInterface {
     }
 
     @Override
-    public Log getLogger() {
-        return getLog();
+    public void execute() throws MojoExecutionException {
+        ExecuteConsumer<Object, ExecutionMojo, Integer> executeConsumer = (object, ex, exIndex) -> {
+            DocumentContext json = (DocumentContext) object;
+            json.delete(ex.getToken());
+            info(format("(%d) rm: %s", exIndex, ex.getToken()));
+        };
+
+        executeAction(executeConsumer, JSON);
     }
 }
