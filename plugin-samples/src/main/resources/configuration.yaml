@@ -1,0 +1,164 @@
+configuration:
+
+  # 1) edit-by-regex
+  - id: edit-by-regex
+    jsonIn: target/classes/test.json
+    jsonOut: target/classes/test_config_mojo_out.json
+    goal: regex
+    executions:
+      - token: "(?<=\"number3\":\\s)[1-9].[1-9]"
+        value: |
+          123.456,
+              "number4" : 123
+
+  # 2) modify-json
+  - id: modify-json
+    jsonIn: target/classes/test.json
+    jsonOut: target/classes/test_config_mojo_out.json
+    goal: modify
+    executions:
+      - token: $.text
+        value: new text
+        validation: '"Test"'
+      - token: $.flag2
+        value: 'false'
+        type: boolean
+      - token: $.number
+        value: '2'
+        type: 'integer'
+      - token: $.number3
+        value: '2.2'
+        type: 'double'
+      - token: $.null
+        type: 'null'
+      - token: $.array
+        value: '["t1","t2"]'
+        type: json
+      - token: $.modifyArray.[1]
+        value: arrayTest
+      - token: $.data.jsonValue
+        value: |
+          {
+            "text": "Test",
+            "flag": true,
+            "number": 1,
+            "number2": 2.5,
+            "d": {
+              "r": "t"
+            }
+          }
+        type: json
+
+  # 3) add-json
+  - id: add-json
+    jsonIn: target/classes/test.json
+    jsonOut: target/classes/test_config_mojo_out.json
+    goal: insert
+    executions:
+      - token: "@"
+        key: key1
+        value: |
+          {
+            "a1": "a2"
+          }
+        type: json
+      - token: $.l1
+        value: |
+          {
+            "l2": "test5"
+          }
+        type: json
+        arrayIndex: 1
+      - token: $.l1[2]
+        key: i1
+        value: test4
+        validation: '{"i1":"test2"}'
+      - token: $.l1
+        type: 'null'
+      - token: $.l1
+        value: value1
+      - token: $.l1
+        value: | 
+          {
+            "a1": "a2"
+          }
+        type: json
+      - token: '@'
+        key: key2
+        value: value1
+      - token: $.jo
+        key: key3
+        value: value3
+      - token: $.l1[2]
+        key: key4
+        value: value4
+
+  # 4) remove-json
+  - id: remove-json
+    jsonIn: target/classes/test.json
+    jsonOut: target/classes/test_config_mojo_out.json
+    goal: remove
+    executions:
+      - token: $.text2
+        skipIfNotFoundElement: true
+        validation: '"text"'
+      - token: $.jsonObjArr[?(@.value == '1')]
+        validation: '[{"value":1}]'
+      - token: $.jsonArr[1]
+        validation: '"text"'
+      - token: $.number2
+        validation: '1.1'
+      - token: $.flag
+        validation: 'true'
+      - token: $.arr.null
+
+  # 5) add-json-as-mask
+  - id: add-json-as-mask
+    jsonIn: target/classes/test.json
+    jsonOut: target/classes/test_config_mojo_out.json
+    goal: insert
+    executions:
+      - token: $.resources[?(@.resource == 'url/document/*')].properties[?(@.name == 'content')].policies.*
+        value: |
+          {
+            "a1": "a2"
+          }
+        type: json
+
+  # 6) modify-json-incorrect-token
+  - id: modify-json-incorrect-token
+    jsonIn: target/classes/test.json
+    jsonOut: target/classes/test_config_mojo_out.json
+    goal: modify
+    executions:
+      - token: |
+          $.
+          text
+        value: new text
+        validation: '"Test"'
+      - token: |
+          $.resources[?(@['name with spaces'] == 'test')].['name with spaces']
+        value: test2
+
+  # 7) modify-json-from-file
+  - id: modify-json-from-file
+    jsonIn: target/classes/test.json
+    jsonOut: target/classes/test_config_mojo_out.json
+    goal: modify
+    executions:
+      - token: $.text
+        valueFile: src/main/resources/input_data.json
+        type: json
+      - token: $.text2
+        valueFile: src/main/resources/input_data.json
+
+  # 8) modify-json-from-file-insert
+  - id: modify-json-from-file-insert
+    jsonIn: target/classes/test.json
+    jsonOut: target/classes/test_config_mojo_out.json
+    goal: insert
+    executions:
+      - token: $
+        key: resourceFromFile
+        valueFile: src/main/resources/input_data.json
+        type: json
