@@ -26,6 +26,15 @@ public class ModifyJsonMojo extends AbstractMojo implements UtilsInterface {
     @Parameter(alias = "executions", required = true)
     private List<ExecutionMojo> executions;
 
+    public ModifyJsonMojo() {
+    }
+
+    public ModifyJsonMojo(String jsonInputPath, String jsonOutputPath, List<ExecutionMojo> executions) {
+        this.jsonInputPath = jsonInputPath;
+        this.jsonOutputPath = jsonOutputPath;
+        this.executions = executions;
+    }
+
     @Override
     public void execute() throws MojoExecutionException {
         ExecuteConsumer<Object, ExecutionMojo, Integer> executeConsumer = (object, ex, exIndex) -> {
