@@ -2,7 +2,7 @@ configuration:
 
   # 1) edit-by-regex
   - id: edit-by-regex
-    jsonIn: target/classes/test.json
+    jsonIn: ${project.basedir}/target/classes/test.json
     jsonOut: target/classes/test_config_mojo_out.json
     goal: regex
     executions:
@@ -59,7 +59,7 @@ configuration:
         key: key1
         value: |
           {
-            "a1": "a2"
+            "a1": "a2${project.basedir}"
           }
         type: json
       - token: $.l1
