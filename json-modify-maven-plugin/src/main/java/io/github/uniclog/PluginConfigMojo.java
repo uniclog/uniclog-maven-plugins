@@ -5,9 +5,10 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.github.uniclog.execution.ExecutionConfig;
 import io.github.uniclog.execution.PluginConfig;
 import io.github.uniclog.utils.JmAbstractMojo;
+import io.github.uniclog.utils.MavenInterpolator;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -32,8 +33,11 @@ import static java.lang.String.format;
 public class PluginConfigMojo extends JmAbstractMojo {
     @Parameter(alias = "config")
     private String pluginConfigPath;
-    @Component
+
+    @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
+    @Parameter(defaultValue = "${session}", readonly = true)
+    private MavenSession session;
 
     private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -41,7 +45,7 @@ public class PluginConfigMojo extends JmAbstractMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         Path configPath = project.getBasedir().toPath().resolve(pluginConfigPath);
-        PluginConfig pluginConfig = loadAndValidate(configPath);
+        PluginConfig pluginConfig = loadConfiguration(configPath);
 
         Map<String, Function<ExecutionConfig, JmAbstractMojo>> fab = Map.of(
                 "modify", action -> new ModifyJsonMojo(action.getJsonIn(), action.getJsonOut(), action.getExecutions()),
@@ -51,6 +55,7 @@ public class PluginConfigMojo extends JmAbstractMojo {
         );
 
         for (ExecutionConfig action : pluginConfig.getConfiguration()) {
+            getLogger().info("=> Json: " + action.getJsonIn());
             var mojo = fab.get(action.getGoal()).apply(action);
             if (mojo == null) {
                 throw new MojoExecutionException("Unexpected value: " + action.getGoal());
@@ -60,10 +65,20 @@ public class PluginConfigMojo extends JmAbstractMojo {
         }
     }
 
-    private PluginConfig loadAndValidate(Path yamlPath) throws MojoExecutionException {
+    private PluginConfig loadConfiguration(Path yamlPath) throws MojoExecutionException {
+        String rawYaml;
+        try {
+            rawYaml = Files.readString(yamlPath);
+        } catch (IOException ex) {
+            throw new MojoExecutionException("Cannot read YAML: " + yamlPath, ex);
+        }
+
+        MavenInterpolator interpolator = new MavenInterpolator(project, session);
+        String interpolatedYaml = interpolator.interpolate(rawYaml);
+
         Object yamlObj;
-        try (InputStream in = Files.newInputStream(yamlPath)) {
-            yamlObj = yamlMapper.readValue(in, Object.class);
+        try {
+            yamlObj = yamlMapper.readValue(interpolatedYaml, Object.class);
         } catch (IOException ex) {
             throw new MojoExecutionException("Cannot read YAML: " + yamlPath, ex);
         }
